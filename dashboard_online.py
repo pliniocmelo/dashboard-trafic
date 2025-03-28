@@ -41,19 +41,24 @@ def carregar_dados():
     df = pd.read_csv(sheet_url)
     df.columns = [col.strip() for col in df.columns]
 
-    colunas_numericas = ["Leads", "Alcance", "Impressões", "CPM", "CPL", "CPC", "CTR", "Cliques", "Valor usado"]
+    colunas_numericas = ["Alcance", "Impressões", "CPM", "CPL", "CPC", "CTR", "Cliques", "Valor usado"]
     for col in colunas_numericas:
         if col in df.columns:
             df[col] = (
                 df[col]
                 .astype(str)
-                .str.replace("R\$", "", regex=True)
+                .str.replace("R\\$", "", regex=True)
                 .str.replace("%", "")
-                .str.replace("\\.", "", regex=True)  # remove separador de milhar
-                .str.replace(",", ".", regex=False)  # converte decimal para ponto
+                .str.replace("\\.", "", regex=True)
+                .str.replace(",", ".", regex=False)
                 .str.strip()
             )
             df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # Converte Leads apenas se for possível, sem aplicar transformações perigosas
+    if "Leads" in df.columns:
+        df["Leads"] = pd.to_numeric(df["Leads"], errors="coerce")
+
     return df
 
 df = carregar_dados()
